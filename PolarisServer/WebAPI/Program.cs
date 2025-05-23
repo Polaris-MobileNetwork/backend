@@ -1,7 +1,13 @@
 
 
+using System.Reflection;
+using Application.Interfaces.IRepositories;
+using Application.Interfaces.IServices;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +21,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")
 ));
+builder.Services.AddMediatR(config => 
+    config.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()
+));
+
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IIdentityService,IdentityService>();
+
+
 
 var app = builder.Build();
 
