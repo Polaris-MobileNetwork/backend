@@ -10,7 +10,7 @@ namespace WebAPI.Controllers
     {
         protected readonly IMediator mediator;
 
-        public BaseController(IMediator mediatorW)
+        public BaseController(IMediator mediator)
         {
             this.mediator = mediator;
         }

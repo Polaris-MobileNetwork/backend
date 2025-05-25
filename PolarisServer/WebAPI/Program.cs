@@ -1,6 +1,7 @@
 
 
 using System.Reflection;
+using Application.Common.Models.Authentication;
 using Application.Interfaces.IRepositories;
 using Application.Interfaces.IServices;
 using Infrastructure.Data;
@@ -22,15 +23,17 @@ builder.Services.AddDbContext<ApplicationDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 builder.Services.AddMediatR(config => 
-    config.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()
-));
+    config.RegisterServicesFromAssemblies(typeof(Application.Common.AssemblyReference).Assembly
+    ));
 
+builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("Jwt"));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IIdentityService,IdentityService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 
 
@@ -46,6 +49,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

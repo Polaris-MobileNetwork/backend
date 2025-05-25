@@ -32,5 +32,10 @@ namespace Infrastructure.Repositories
         {
             return await dataContext.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
+
+        public async Task<User?> GetUser(string username)
+        {
+            return await dataContext.Users.FirstOrDefaultAsync(u=> u.Username == username);
+        }
     }
 }
