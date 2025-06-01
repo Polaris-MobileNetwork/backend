@@ -19,13 +19,13 @@ namespace Application.Features.Users
     {
         private readonly IUnitOfWork uow;
         private readonly IJwtService jwtService;
-        private readonly IIdentityService identityService;
+        private readonly IHashService hashService;
 
-        public LoginHandler(IUnitOfWork uow, IJwtService jwtService, IIdentityService identityService)
+        public LoginHandler(IUnitOfWork uow, IJwtService jwtService, IHashService hashService)
         {
             this.uow = uow;
             this.jwtService = jwtService;
-            this.identityService = identityService;
+            this.hashService = hashService;
         }
         public async Task<LoginResult> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
@@ -38,7 +38,7 @@ namespace Application.Features.Users
                 return result;
             }
 
-            var isCorrectPassword = identityService.VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt);
+            var isCorrectPassword = hashService.VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt);
 
             if (!isCorrectPassword)
             {

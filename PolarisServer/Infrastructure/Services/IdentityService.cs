@@ -1,30 +1,27 @@
-﻿using System.Security.Cryptography;
+﻿using System.Security.Claims;
 using Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Services
 {
     public class IdentityService : IIdentityService
     {
-        private const int hashSize = 32;
-        private const int saltSize = 32;
-        private const int maxIterations = 100000;
-        
-        public (byte[] passwordHash, byte[] passwordSalt) HashPassword(string password)
+        private readonly IHttpContextAccessor contextAccessor;
+
+        public IdentityService(IHttpContextAccessor contextAccessor)
         {
-            var salt = RandomNumberGenerator.GetBytes(saltSize);
-
-            using var pbk = new Rfc2898DeriveBytes(password, salt, maxIterations, HashAlgorithmName.SHA256);
-            var hash = pbk.GetBytes(hashSize);
-
-            return (hash, salt);
+            this.contextAccessor = contextAccessor;
         }
 
-        public bool VerifyPassword(string password, byte[] passwordHash, byte[] passwordSalt)
+        public Guid? GetCurrentUserId()
         {
-            using var pbk = new Rfc2898DeriveBytes(password, passwordSalt,maxIterations, HashAlgorithmName.SHA256);
-            var computedHash = pbk.GetBytes(hashSize);
+            string? userId = contextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            return CryptographicOperations.FixedTimeEquals(passwordHash, computedHash);
+            if (Guid.TryParse(userId, out Guid result))
+            {
+                return result;
+            }
+            return null;
         }
     }
 }

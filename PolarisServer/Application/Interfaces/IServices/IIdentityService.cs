@@ -1,8 +1,13 @@
-﻿namespace Application.Interfaces.IServices
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.Interfaces.IServices
 {
     public interface IIdentityService
     {
-        (byte[] passwordHash, byte[] passwordSalt) HashPassword(string password);
-        bool VerifyPassword(string password, byte[] passwordHash, byte[] passwordSalt);
+        Guid? GetCurrentUserId();
     }
 }

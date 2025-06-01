@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.RegularExpressions;
 using Application.Common.Models;
 using Application.Interfaces.IRepositories;
 using Application.Interfaces.IServices;
@@ -21,18 +22,21 @@ namespace Application.Features.Users
     public class SignUpHandler : IRequestHandler<SignUpCommand, SignUpResult>
     {
         private readonly IUnitOfWork uow;
+        private readonly IHashService hashService;
         private readonly IIdentityService identityService;
 
-        public SignUpHandler(IUnitOfWork uow, IIdentityService identityService)
+        public SignUpHandler(IUnitOfWork uow, IHashService hashService, IIdentityService identityService)
         {
             this.uow = uow;
+            this.hashService = hashService;
             this.identityService = identityService;
         }
         public async Task<SignUpResult> Handle(SignUpCommand request, CancellationToken cancellationToken)
         {
             var result = new SignUpResult();
 
-            if (string.IsNullOrEmpty(request.Username) || request.Username.Length < 3) 
+            var x = Regex.IsMatch(request.Username, @"^[a-zA-Z0-9]{4,}$");
+            if (string.IsNullOrEmpty(request.Username) || !Regex.IsMatch(request.Username, @"^[a-zA-Z0-9]{4,}$")) 
             {
                 result.Code = 401;
                 result.Message = "invalid username";
@@ -53,7 +57,7 @@ namespace Application.Features.Users
                 return result;
             }
 
-            (byte[] passwordHash, byte[] passwordSalt) = identityService.HashPassword(request.Password);
+            (byte[] passwordHash, byte[] passwordSalt) = hashService.HashPassword(request.Password);
 
 
             User user = new()
