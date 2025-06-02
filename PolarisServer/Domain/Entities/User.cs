@@ -6,6 +6,8 @@
         public string Username { get; set; }
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
+        public Guid? NetworkInformationId { get; set; }
+        public NetworkMeasurement? NetworkInformation { get; set; }
 
     }
 }
