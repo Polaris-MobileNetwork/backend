@@ -86,6 +86,7 @@ builder.Services.AddMediatR(config =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<INetworkMeasurementRepository, NetworkMeasurementRepository>();
 
 builder.Services.AddScoped<IHashService, HashService>();
 builder.Services.AddScoped<IJwtService, JwtService>();

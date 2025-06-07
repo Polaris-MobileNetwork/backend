@@ -8,7 +8,8 @@ namespace Application.Interfaces.IRepositories
 {
     public interface IUnitOfWork
     {
-        public IUserRepository Users{ get; }
+        public IUserRepository Users { get; }
+        public INetworkMeasurementRepository NetworkMeasurements { get; }
         Task<int> SaveChangesAsync();
     }
 }

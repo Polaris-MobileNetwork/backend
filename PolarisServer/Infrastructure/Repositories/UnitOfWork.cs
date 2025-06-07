@@ -13,12 +13,18 @@ namespace Infrastructure.Repositories
         private readonly ApplicationDataContext dataContext;
 
         public IUserRepository Users { get; }
+        public INetworkMeasurementRepository NetworkMeasurements { get; }
 
-        public UnitOfWork(ApplicationDataContext dataContext,  IUserRepository userRepository)
+        public UnitOfWork(
+            ApplicationDataContext dataContext,
+            IUserRepository userRepository,
+            INetworkMeasurementRepository networkMeasurementRepository)
         {
             this.dataContext = dataContext;
             this.Users = userRepository;
+            this.NetworkMeasurements = networkMeasurementRepository;
         }
+
         public async Task<int> SaveChangesAsync()
         {
             return await dataContext.SaveChangesAsync();
