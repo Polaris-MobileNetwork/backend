@@ -100,14 +100,18 @@ builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 
-
+app.Urls.Add("http://*:80");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Polaris API V1");
+    c.RoutePrefix = "swagger";
+});
+
 app.UseCors((policy) => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 app.UseHttpsRedirection();
 

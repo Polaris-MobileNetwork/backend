@@ -1,42 +1,42 @@
 #!/bin/bash
-set -e
 
-echo "Starting Polaris Server..."
+echo "🏁 Starting SQL Server..."
+docker-compose up -d sqlserver
 
-# Wait for SQL Server to be ready
-echo "Waiting for SQL Server to be ready..."
-until dotnet /app/WebAPI.dll --help > /dev/null 2>&1; do
-  echo "Waiting for dependencies..."
-  sleep 2
-done
+echo "⏳ Waiting for SQL Server to be ready..."
+sleep 30
 
-# Change to source directory for EF migrations
-cd /src
+MAX_ATTEMPTS=20
+ATTEMPT=1
 
-# Check if database exists and run migrations
-echo "Checking database connection and running migrations..."
-max_attempts=30
-attempt=1
-
-while [ $attempt -le $max_attempts ]; do
-  echo "Attempt $attempt of $max_attempts..."
-  
-  if dotnet ef database update --project Infrastructure --startup-project WebAPI --connection "$ConnectionStrings__DefaultConnection"; then
-    echo "✅ Database migrations completed successfully!"
-    break
-  else
-    echo "❌ Migration attempt $attempt failed. Retrying in 5 seconds..."
-    sleep 5
-    ((attempt++))
-  fi
-  
-  if [ $attempt -gt $max_attempts ]; then
-    echo "❌ Failed to apply migrations after $max_attempts attempts"
+until docker-compose exec sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q "SELECT 1" > /dev/null 2>&1; do
+  if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+    echo "❌ SQL Server did not respond after $MAX_ATTEMPTS attempts."
     exit 1
   fi
+  echo "⏳ Attempt $ATTEMPT: SQL Server not ready yet..."
+  ATTEMPT=$((ATTEMPT+1))
+  sleep 5
 done
 
-# Change back to app directory and start the application
-cd /app
-echo "🚀 Starting the application..."
-exec dotnet WebAPI.dll
+echo "✅ SQL Server is ready!"
+
+echo "🚀 Running EF Core migrations from source..."
+
+docker run --rm \
+  --network=polaris_polaris-network \
+  -v $(pwd):/src \
+  -w /src \
+  mcr.microsoft.com/dotnet/sdk:8.0 \
+  /bin/bash -c "
+    dotnet tool install --global dotnet-ef --version 8.0.5 && \
+    export PATH=\$PATH:/root/.dotnet/tools && \
+    dotnet ef database update --project Infrastructure --startup-project WebAPI --connection 'Server=sqlserver,1433;Database=PolarisDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;'"
+
+if [ $? -eq 0 ]; then
+  echo "✅ Migration complete!"
+  echo "👉 Now start the WebAPI: docker-compose up -d webapi"
+else
+  echo "❌ Migration failed."
+  exit 1
+fi

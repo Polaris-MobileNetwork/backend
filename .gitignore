@@ -38,8 +38,8 @@ artifacts/
 *.pidb
 *.userprefs
 
-# Entity Framework
-Migrations/
+
+
 
 # Others
 *.ncrunch*
