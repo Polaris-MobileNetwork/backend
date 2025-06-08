@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "🏁 Starting SQL Server..."
+echo "Starting SQL Server..."
 docker-compose up -d sqlserver
 
-echo "⏳ Waiting for SQL Server to be ready..."
+echo "Waiting for SQL Server to be ready..."
 sleep 30
 
 MAX_ATTEMPTS=20
@@ -11,17 +11,17 @@ ATTEMPT=1
 
 until docker-compose exec sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q "SELECT 1" > /dev/null 2>&1; do
   if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
-    echo "❌ SQL Server did not respond after $MAX_ATTEMPTS attempts."
+    echo "SQL Server did not respond after $MAX_ATTEMPTS attempts."
     exit 1
   fi
-  echo "⏳ Attempt $ATTEMPT: SQL Server not ready yet..."
+  echo "Attempt $ATTEMPT: SQL Server not ready yet..."
   ATTEMPT=$((ATTEMPT+1))
   sleep 5
 done
 
-echo "✅ SQL Server is ready!"
+echo "SQL Server is ready."
 
-echo "🚀 Running EF Core migrations from source..."
+echo "Running EF Core migrations from source..."
 
 docker run --rm \
   --network=polaris_polaris-network \
@@ -34,9 +34,9 @@ docker run --rm \
     dotnet ef database update --project Infrastructure --startup-project WebAPI --connection 'Server=sqlserver,1433;Database=PolarisDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;'"
 
 if [ $? -eq 0 ]; then
-  echo "✅ Migration complete!"
-  echo "👉 Now start the WebAPI: docker-compose up -d webapi"
+  echo "Migration complete."
+  echo "You can now start the WebAPI: docker-compose up -d webapi"
 else
-  echo "❌ Migration failed."
+  echo "Migration failed."
   exit 1
 fi
