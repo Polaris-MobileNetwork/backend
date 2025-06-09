@@ -28,10 +28,10 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 
 # Run migrations from source, then run app from /out
 ENTRYPOINT ["/bin/bash", "-c", "\
-  echo '⏳ Waiting for SQL Server...'; \
+  echo 'Waiting for SQL Server...'; \
   sleep 30; \
-  echo '🚀 Running EF Core Migrations...'; \
+  echo 'Running EF Core Migrations...'; \
   dotnet ef database update --project Infrastructure --startup-project WebAPI --connection 'Server=sqlserver,1433;Database=PolarisDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;' && \
-  echo '✅ Migration complete. Starting WebAPI...' && \
+  echo 'Migration complete. Starting WebAPI...' && \
   cd /app/out && \
   dotnet WebAPI.dll"]
