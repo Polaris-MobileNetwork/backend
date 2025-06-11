@@ -64,7 +64,7 @@ jobs:
             # Create the .env file on the server using GitHub Secrets
             # This provides the variables for docker-compose.prod.yml
             echo "DOCKER_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > .env
-            echo "IMAGE_TAG=${{ github.sha }}" >> .env
+            echo "DOCKER_PASSWORD=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
             echo "DB_SA_PASSWORD=${{ secrets.DB_SA_PASSWORD }}" >> .env
 
             # Use docker-compose with the .env file to run the deployment
