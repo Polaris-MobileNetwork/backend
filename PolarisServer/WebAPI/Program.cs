@@ -13,10 +13,9 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -100,9 +99,18 @@ builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 
-app.Urls.Add("http://*:80");
+//app.Urls.Add("http://*:80");
 
-// Configure the HTTP request pipeline.
+
+using (var scope = app.Services.CreateScope())
+{
+       
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDataContext>();
+    dbContext.Database.Migrate();
+    
+   
+}
+
 
 
 app.UseSwagger();
