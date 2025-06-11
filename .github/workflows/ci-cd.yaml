@@ -68,8 +68,8 @@ jobs:
             echo "DB_SA_PASSWORD=${{ secrets.DB_SA_PASSWORD }}" >> .env
 
             # Use docker-compose with the .env file to run the deployment
-            docker-compose --env-file .env -f docker-compose.prod.yml pull webapi
-            docker-compose --env-file .env -f docker-compose.prod.yml up -d --force-recreate --no-deps webapi
+            docker compose --env-file .env -f docker-compose.prod.yml pull webapi
+            docker compose --env-file .env -f docker-compose.prod.yml up -d --force-recreate --no-deps webapi
 
             # Clean up old, unused Docker images to save disk space
             docker image prune -af
