@@ -59,7 +59,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             # Navigate to the project directory on the server
-            cd /home/${{ secrets.SERVER_HOST }}/polaris-project/
+            cd /home/root/polaris-project/
 
             # Create the .env file on the server using GitHub Secrets
             # This provides the variables for docker-compose.prod.yml
