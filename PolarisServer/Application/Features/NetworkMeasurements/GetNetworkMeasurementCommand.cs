@@ -26,6 +26,34 @@ namespace Application.Features.NetworkMeasurements
         public List<NetworkMeasurement> Measurements { get; set; }
     }
 
+    public class GetLatestNetworkMeasurementsCommand : IRequest<GetLatestNetworkMeasurementsResult>
+    {
+        public int PageSize { get; set; } = 10;
+        public int PageNumber { get; set; } = 1;
+    }
+
+    public class GetLatestNetworkMeasurementsResult : ResultModel
+    {
+        public List<NetworkMeasurement> Measurements { get; set; }
+        public int TotalCount { get; set; }
+        public int PageSize { get; set; }
+        public int PageNumber { get; set; }
+        public int TotalPages { get; set; }
+    }
+
+    public class GetMeasurementsInAreaCommand : IRequest<GetMeasurementsInAreaResult>
+    {
+        public double MinLatitude { get; set; }
+        public double MaxLatitude { get; set; }
+        public double MinLongitude { get; set; }
+        public double MaxLongitude { get; set; }
+    }
+
+    public class GetMeasurementsInAreaResult : ResultModel
+    {
+        public List<NetworkMeasurement> Measurements { get; set; }
+    }
+
     public class GetNetworkMeasurementHandler : IRequestHandler<GetNetworkMeasurementCommand, GetNetworkMeasurementResult>
     {
         private readonly IUnitOfWork uow;
@@ -95,6 +123,91 @@ namespace Application.Features.NetworkMeasurements
                 result.Message = "No network measurements found";
                 return result;
             }
+
+            result.Success = true;
+            result.Code = 200;
+            result.Measurements = measurements.ToList();
+
+            return result;
+        }
+    }
+
+    public class GetLatestNetworkMeasurementsHandler : IRequestHandler<GetLatestNetworkMeasurementsCommand, GetLatestNetworkMeasurementsResult>
+    {
+        private readonly IUnitOfWork uow;
+        private readonly IIdentityService identityService;
+
+        public GetLatestNetworkMeasurementsHandler(IUnitOfWork uow, IIdentityService identityService)
+        {
+            this.uow = uow;
+            this.identityService = identityService;
+        }
+
+        public async Task<GetLatestNetworkMeasurementsResult> Handle(GetLatestNetworkMeasurementsCommand request, CancellationToken cancellationToken)
+        {
+            var result = new GetLatestNetworkMeasurementsResult
+            {
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber
+            };
+
+            var currentUserId = identityService.GetCurrentUserId();
+            if (!currentUserId.HasValue)
+            {
+                result.Code = 401;
+                result.Message = "User not authenticated";
+                return result;
+            }
+
+            var (measurements, totalCount) = await uow.NetworkMeasurements.GetLatestMeasurements(request.PageSize, request.PageNumber);
+            
+            result.Success = true;
+            result.Code = 200;
+            result.Measurements = measurements.ToList();
+            result.TotalCount = totalCount;
+            result.TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
+
+            return result;
+        }
+    }
+
+    public class GetMeasurementsInAreaHandler : IRequestHandler<GetMeasurementsInAreaCommand, GetMeasurementsInAreaResult>
+    {
+        private readonly IUnitOfWork uow;
+        private readonly IIdentityService identityService;
+
+        public GetMeasurementsInAreaHandler(IUnitOfWork uow, IIdentityService identityService)
+        {
+            this.uow = uow;
+            this.identityService = identityService;
+        }
+
+        public async Task<GetMeasurementsInAreaResult> Handle(GetMeasurementsInAreaCommand request, CancellationToken cancellationToken)
+        {
+            var result = new GetMeasurementsInAreaResult { Measurements = new List<NetworkMeasurement>() };
+
+            var currentUserId = identityService.GetCurrentUserId();
+            if (!currentUserId.HasValue)
+            {
+                result.Code = 401;
+                result.Message = "User not authenticated";
+                return result;
+            }
+
+            // Validate coordinates
+            if (request.MinLatitude > request.MaxLatitude || request.MinLongitude > request.MaxLongitude)
+            {
+                result.Code = 400;
+                result.Message = "Invalid coordinate range";
+                return result;
+            }
+
+            var measurements = await uow.NetworkMeasurements.GetMeasurementsInArea(
+                request.MinLatitude,
+                request.MaxLatitude,
+                request.MinLongitude,
+                request.MaxLongitude
+            );
 
             result.Success = true;
             result.Code = 200;
