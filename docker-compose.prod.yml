@@ -21,7 +21,7 @@ services:
   # Your .NET Web API Service
   webapi:
     # The image name and tag are controlled by variables from the .env file
-    image: ${DOCKER_USERNAME}/polaris-api:latest
+    image: ${DOCKER_USERNAME}/polaris-api:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       - sqlserver
