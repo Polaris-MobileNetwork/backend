@@ -1,0 +1,75 @@
+# .github/workflows/deploy-api.yml
+name: Build and Deploy Polaris API
+
+# This workflow runs on any push to your main branch
+on:
+  push:
+    branches: ["pipelines"]
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          dockerfile: Dockerfile
+          push: true
+          # We tag with both the unique commit hash and 'latest'
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/polaris-api:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/polaris-api:latest
+
+  deploy:
+    name: Deploy to Production Server
+    # This job runs only after the 'build-and-push' job succeeds
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code # Needed to access the docker-compose.prod.yml file
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          # Deploys the file to the project directory we created on the server
+          target: "/home/${{ secrets.SERVER_USERNAME }}/polaris-project"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # Navigate to the project directory on the server
+            cd /home/${{ secrets.SERVER_USERNAME }}/polaris-project
+
+            # Create the .env file on the server using GitHub Secrets
+            # This provides the variables for docker-compose.prod.yml
+            echo "DOCKER_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > .env
+            echo "IMAGE_TAG=${{ github.sha }}" >> .env
+            echo "DB_SA_PASSWORD=${{ secrets.DB_SA_PASSWORD }}" >> .env
+
+            # Use docker-compose with the .env file to run the deployment
+            docker-compose --env-file .env -f docker-compose.prod.yml pull webapi
+            docker-compose --env-file .env -f docker-compose.prod.yml up -d --force-recreate --no-deps webapi
+
+            # Clean up old, unused Docker images to save disk space
+            docker image prune -af
