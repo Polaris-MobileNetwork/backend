@@ -2,7 +2,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy all .csproj files and restore dependencies first to leverage Docker layer caching
+# Copy project files and restore dependencies first to leverage Docker layer caching
+# This part is good, let's keep it. You can even add your .sln file for better caching.
+# COPY YourSolution.sln .
 COPY ["WebAPI/WebAPI.csproj", "WebAPI/"]
 COPY ["Application/Application.csproj", "Application/"]
 COPY ["Domain/Domain.csproj", "Domain/"]
@@ -11,14 +13,16 @@ RUN dotnet restore "WebAPI/WebAPI.csproj"
 
 # Copy the rest of the source code
 COPY . .
-WORKDIR "/src/WebAPI"
-RUN dotnet build "WebAPI.csproj" -c Release -o /app/build
 
-# Publish the application
+# Build the application FROM THE ROOT /src directory
+# This avoids changing the WORKDIR and potential path issues.
+RUN dotnet build "WebAPI/WebAPI.csproj" -c Release -o /app/build
+
+# Stage 2: Publish the application
 FROM build AS publish
-RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "WebAPI/WebAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Stage 2: Create the final runtime image
+# Stage 3: Create the final runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
