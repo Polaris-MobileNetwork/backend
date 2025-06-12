@@ -14,15 +14,21 @@ namespace Infrastructure.Repositories
 
         public IUserRepository Users { get; }
         public INetworkMeasurementRepository NetworkMeasurements { get; }
+        public ITestRepository Tests { get; }
+        public ITestResultRepository TestResults { get; }
 
         public UnitOfWork(
             ApplicationDataContext dataContext,
             IUserRepository userRepository,
-            INetworkMeasurementRepository networkMeasurementRepository)
+            INetworkMeasurementRepository networkMeasurementRepository,
+            ITestRepository testRepository,
+            ITestResultRepository testResultRepository)
         {
             this.dataContext = dataContext;
             this.Users = userRepository;
             this.NetworkMeasurements = networkMeasurementRepository;
+            this.Tests = testRepository;
+            this.TestResults = testResultRepository;
         }
 
         public async Task<int> SaveChangesAsync()

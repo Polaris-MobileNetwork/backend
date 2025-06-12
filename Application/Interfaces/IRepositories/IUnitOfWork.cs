@@ -10,6 +10,8 @@ namespace Application.Interfaces.IRepositories
     {
         public IUserRepository Users { get; }
         public INetworkMeasurementRepository NetworkMeasurements { get; }
+        public ITestRepository Tests { get; }
+        public ITestResultRepository TestResults { get; }
         Task<int> SaveChangesAsync();
     }
 }
