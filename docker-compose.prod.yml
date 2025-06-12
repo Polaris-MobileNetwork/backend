@@ -3,7 +3,7 @@ services:
   # Service for your ASP.NET Core Web API
   polarisapi:
     # We use the image built by our CI/CD pipeline
-    image: ${DOCKER_USERNAME}/polaris-postgres-api:${IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME}/polaris-api:${IMAGE_TAG:-latest}
     restart: unless-stopped
     ports:
       - "8080:8080"
