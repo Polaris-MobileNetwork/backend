@@ -1,0 +1,38 @@
+# docker-compose.prod.yml
+services:
+  # Service for your ASP.NET Core Web API
+  polarisapi:
+    # We use the image built by our CI/CD pipeline
+    image: ${DOCKER_USERNAME}/polaris-postgres-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      # The password is now securely passed in from a variable
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=BechenDB;Username=postgres;Password=1234
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+
+  # Service for your PostgreSQL Database
+  postgres-db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      # The password is also passed in securely from a variable
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=BechenDB
+    # For security, we DO NOT expose the database port in production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d BechenDB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

@@ -4,7 +4,7 @@ name: Build and Deploy Polaris API
 # This workflow runs on any push to your main branch
 on:
   push:
-    branches: ["pipelines"]
+    branches: ["main"]
 
 jobs:
   build-and-push:
@@ -49,7 +49,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "docker-compose.prod.yml"
           # Deploys the file to the project directory we created on the server
-          target: "/home/${{ secrets.SERVER_USERNAME }}/polaris-project"
+          target: "/home/${{ secrets.SERVER_USERNAME }}/polaris-project/"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -65,11 +65,8 @@ jobs:
             # This provides the variables for docker-compose.prod.yml
             echo "DOCKER_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > .env
             echo "DOCKER_PASSWORD=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
-            echo "DB_SA_PASSWORD=${{ secrets.DB_SA_PASSWORD }}" >> .env
 
             # Use docker-compose with the .env file to run the deployment
-            docker compose --env-file .env -f docker-compose.prod.yml pull
-            docker compose --env-file .env -f docker-compose.prod.yml up -d 
-
+            docker compose --env-file .env -f docker-compose.prod.yml up -d --force-recreate
             # Clean up old, unused Docker images to save disk space
             docker image prune -af
