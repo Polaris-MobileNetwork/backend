@@ -54,6 +54,20 @@ namespace Application.Features.NetworkMeasurements
         public List<NetworkMeasurement> Measurements { get; set; }
     }
 
+    public class GetMeasurementsByLocationAndTimeRangeCommand : IRequest<GetMeasurementsByLocationAndTimeRangeResult>
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public long StartTime { get; set; }
+        public long EndTime { get; set; }
+        public double RadiusInMeters { get; set; } = 100;
+    }
+
+    public class GetMeasurementsByLocationAndTimeRangeResult : ResultModel
+    {
+        public List<NetworkMeasurement> Measurements { get; set; } = new();
+    }
+
     public class GetNetworkMeasurementHandler : IRequestHandler<GetNetworkMeasurementCommand, GetNetworkMeasurementResult>
     {
         private readonly IUnitOfWork uow;
@@ -207,6 +221,35 @@ namespace Application.Features.NetworkMeasurements
                 request.MaxLatitude,
                 request.MinLongitude,
                 request.MaxLongitude
+            );
+
+            result.Success = true;
+            result.Code = 200;
+            result.Measurements = measurements.ToList();
+
+            return result;
+        }
+    }
+
+    public class GetMeasurementsByLocationAndTimeRangeHandler : IRequestHandler<GetMeasurementsByLocationAndTimeRangeCommand, GetMeasurementsByLocationAndTimeRangeResult>
+    {
+        private readonly IUnitOfWork uow;
+
+        public GetMeasurementsByLocationAndTimeRangeHandler(IUnitOfWork uow)
+        {
+            this.uow = uow;
+        }
+
+        public async Task<GetMeasurementsByLocationAndTimeRangeResult> Handle(GetMeasurementsByLocationAndTimeRangeCommand request, CancellationToken cancellationToken)
+        {
+            var result = new GetMeasurementsByLocationAndTimeRangeResult();
+
+            var measurements = await uow.NetworkMeasurements.GetMeasurementsByLocationAndTimeRange(
+                request.Latitude,
+                request.Longitude,
+                request.StartTime,
+                request.EndTime,
+                request.RadiusInMeters
             );
 
             result.Success = true;

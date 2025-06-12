@@ -11,5 +11,6 @@ namespace Application.Interfaces.IRepositories
         Task<IEnumerable<NetworkMeasurement>> GetByUserId(Guid userId);
         Task<(IEnumerable<NetworkMeasurement> Measurements, int TotalCount)> GetLatestMeasurements(int pageSize, int pageNumber);
         Task<IEnumerable<NetworkMeasurement>> GetMeasurementsInArea(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude);
+        Task<IEnumerable<NetworkMeasurement>> GetMeasurementsByLocationAndTimeRange(double latitude, double longitude, long startTime, long endTime, double radiusInMeters = 100);
     }
 } 

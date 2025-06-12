@@ -59,7 +59,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<NetworkMeasurement>> GetMeasurementsInArea(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude)
         {
-            // Get all measurements in the area
+          
             var measurements = await dataContext.NetworkMeasurements
                 .Where(n => n.Latitude >= minLatitude && n.Latitude <= maxLatitude &&
                            n.Longitude >= minLongitude && n.Longitude <= maxLongitude)
@@ -74,10 +74,29 @@ namespace Infrastructure.Repositories
                     Latitude = Math.Round(n.Latitude ?? 0, 6),
                     Longitude = Math.Round(n.Longitude ?? 0, 6)
                 })
-                .Select(g => g.First()) // Take the most recent measurement for each location
+                .Select(g => g.First())
                 .ToList();
 
             return groupedMeasurements;
+        }
+
+        public async Task<IEnumerable<NetworkMeasurement>> GetMeasurementsByLocationAndTimeRange(double latitude, double longitude, long startTime, long endTime, double radiusInMeters = 100)
+        {
+            // Convert radius from meters to degrees (approximate)
+            // 1 degree of latitude is approximately 111km at the equator
+            // 1 degree of longitude varies with latitude, but we'll use a rough approximation
+            double latRadius = radiusInMeters / 111000.0;
+            double lonRadius = radiusInMeters / (111000.0 * Math.Cos(latitude * Math.PI / 180.0));
+
+            return await dataContext.NetworkMeasurements
+                .Where(n => n.Latitude >= latitude - latRadius && 
+                           n.Latitude <= latitude + latRadius &&
+                           n.Longitude >= longitude - lonRadius && 
+                           n.Longitude <= longitude + lonRadius &&
+                           n.TimeStamp >= startTime && 
+                           n.TimeStamp <= endTime)
+                .OrderByDescending(n => n.TimeStamp)
+                .ToListAsync();
         }
     }
 } 

@@ -67,5 +67,36 @@ namespace WebAPI.Controllers
                 MaxLongitude = parameters.MaxLongitude
             });
         }
+
+        [HttpGet("location")]
+        public async Task<IActionResult> GetMeasurementsByLocationAndTimeRange(
+            [FromQuery] double latitude,
+            [FromQuery] double longitude,
+            [FromQuery] long startTime,
+            [FromQuery] long endTime,
+            [FromQuery] double radiusInMeters = 100)
+        {
+            if (startTime > endTime)
+            {
+                return BadRequest("Start time must be before end time");
+            }
+
+            if (startTime > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
+            {
+                return BadRequest("Start time cannot be in the future");
+            }
+
+            var command = new GetMeasurementsByLocationAndTimeRangeCommand
+            {
+                Latitude = latitude,
+                Longitude = longitude,
+                StartTime = startTime,
+                EndTime = endTime,
+                RadiusInMeters = radiusInMeters
+            };
+
+            var result = await mediator.Send(command);
+            return Ok(result);
+        }
     }
 } 
