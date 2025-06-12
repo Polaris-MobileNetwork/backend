@@ -75,7 +75,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddDbContext<ApplicationDataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 builder.Services.AddMediatR(config =>
     config.RegisterServicesFromAssemblies(typeof(Application.Common.AssemblyReference).Assembly
