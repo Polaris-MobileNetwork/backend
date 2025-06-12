@@ -58,13 +58,13 @@ namespace Application.Features.NetworkMeasurements
         {
             var result = new SaveNetworkMeasurementResult();
 
-            var currentUserId = identityService.GetCurrentUserId();
-            if (!currentUserId.HasValue)
-            {
-                result.Code = 401;
-                result.Message = "User not authenticated";
-                return result;
-            }
+            //var currentUserId = identityService.GetCurrentUserId();
+            //if (!currentUserId.HasValue)
+            //{
+            //    result.Code = 401;
+            //    result.Message = "User not authenticated";
+            //    return result;
+            //}
 
             var measurement = new NetworkMeasurement
             {
@@ -115,13 +115,13 @@ namespace Application.Features.NetworkMeasurements
         {
             var result = new SaveNetworkMeasurementsResult { Ids = new List<Guid>() };
 
-            var currentUserId = identityService.GetCurrentUserId();
-            if (!currentUserId.HasValue)
-            {
-                result.Code = 401;
-                result.Message = "User not authenticated";
-                return result;
-            }
+            //var currentUserId = identityService.GetCurrentUserId();
+            //if (!currentUserId.HasValue)
+            //{
+            //    result.Code = 401;
+            //    result.Message = "User not authenticated";
+            //    return result;
+            //}
 
             var measurements = request.Measurements.Select(m => new NetworkMeasurement
             {
