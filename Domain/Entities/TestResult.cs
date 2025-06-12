@@ -8,7 +8,6 @@ namespace Domain.Entities
     {
 
         public Guid Id { get; set; }
-        public string? ServerTestId { get; set; }
 
         public long Timestamp { get; set; }
 
@@ -22,9 +21,9 @@ namespace Domain.Entities
 
         public string? Details { get; set; }
 
-        public Guid LocalTestId { get; set; }
+        public Guid? TestId { get; set; }
 
-        [ForeignKey("LocalTestId")]
+        [ForeignKey("TestId")]
         public virtual Test? Test { get; set; }
     }
 } 
