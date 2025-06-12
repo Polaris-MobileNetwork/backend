@@ -1,34 +1,41 @@
-version: "3.8"
-
+# The 'version' attribute is obsolete, you can safely remove it.
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      SA_PASSWORD: "YourStrong!Passw0rd"
-      ACCEPT_EULA: "Y"
-    ports:
-      - "1433:1433"
-    networks:
-      - polaris-network
-    volumes:
-      - sqlvolume:/var/opt/mssql
-
-  webapi:
+  # Service for your ASP.NET Core Web API
+  polarisapi:
+    container_name: polaris-api
     build:
       context: .
       dockerfile: Dockerfile
-    depends_on:
-      - sqlserver
     ports:
-      - "5000:80"
-    networks:
-      - polaris-network
+      - "8080:8080"
+      - "8081:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PolarisDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=BechenDB;Username=postgres;Password=1234
+    depends_on:
+      # NEW: This tells the API to wait until the db service is 'healthy'
+      postgres-db:
+        condition: service_healthy
 
-networks:
-  polaris-network:
+  # Service for your PostgreSQL Database
+  postgres-db:
+    container_name: postgres-db
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=BechenDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # NEW: This block tells Docker how to check if Postgres is ready
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d BechenDB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  sqlvolume:
+  postgres_data:

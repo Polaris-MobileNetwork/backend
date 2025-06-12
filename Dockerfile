@@ -1,36 +1,25 @@
-# Build Stage (This part remains the same)
+# Stage 1: Build the application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY *.sln ./
-COPY Domain/*.csproj ./Domain/
-COPY Application/*.csproj ./Application/
-COPY Infrastructure/*.csproj ./Infrastructure/
-COPY WebAPI/*.csproj ./WebAPI/
-RUN dotnet restore
+
+# Copy all .csproj files and restore dependencies first to leverage Docker layer caching
+COPY ["WebAPI/WebAPI.csproj", "WebAPI/"]
+COPY ["Application/Application.csproj", "Application/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+RUN dotnet restore "WebAPI/WebAPI.csproj"
+
+# Copy the rest of the source code
 COPY . .
-RUN dotnet publish WebAPI/WebAPI.csproj -c Release -o /out
+WORKDIR "/src/WebAPI"
+RUN dotnet build "WebAPI.csproj" -c Release -o /app/build
 
-# Runtime Stage (This part changes)
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+# Publish the application
+FROM build AS publish
+RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Stage 2: Create the final runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-
-# Copy full source and published output from the build stage
-COPY --from=build /src ./
-COPY --from=build /out ./out
-
-# Install EF CLI
-RUN dotnet tool install --global dotnet-ef
-
-# Set environment variable for the EF tool path
-ENV PATH="${PATH}:/root/.dotnet/tools"
-
-# =================================================================
-# NEW INSTRUCTIONS ▼
-# =================================================================
-# Copy the new entrypoint script into the image
-COPY entrypoint.sh .
-# Make the script executable
-RUN chmod +x ./entrypoint.sh
-
-# Set the new entrypoint script as the command to run when the container starts
-ENTRYPOINT ["./entrypoint.sh"]
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "WebAPI.dll"]
