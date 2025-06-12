@@ -32,7 +32,7 @@ services:
     networks:
       - polaris-network
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
       # The connection string also uses the password variable from the .env file
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PolarisDb;User Id=sa;Password=${DB_SA_PASSWORD};TrustServerCertificate=True;
 
@@ -43,10 +43,3 @@ networks:
 # Defines the named volume for persistent database storage
 volumes:
   sqlvolume:
-    # This volume is used to store SQL Server data files, ensuring data persists
-    # even if the container is removed or recreated.
-    driver: local
-    driver_opts:
-      type: none
-      device: /var/opt/mssql
-      o: bind
