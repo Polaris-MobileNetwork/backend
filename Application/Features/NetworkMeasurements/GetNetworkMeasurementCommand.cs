@@ -68,6 +68,17 @@ namespace Application.Features.NetworkMeasurements
         public List<NetworkMeasurement> Measurements { get; set; } = new();
     }
 
+    public class GetMeasurementsByTimeRangeCommand : IRequest<GetMeasurementsByTimeRangeResult>
+    {
+        public long StartTime { get; set; }
+        public long EndTime { get; set; }
+    }
+
+    public class GetMeasurementsByTimeRangeResult : ResultModel
+    {
+        public List<NetworkMeasurement> Measurements { get; set; } = new();
+    }
+
     public class GetNetworkMeasurementHandler : IRequestHandler<GetNetworkMeasurementCommand, GetNetworkMeasurementResult>
     {
         private readonly IUnitOfWork uow;
@@ -250,6 +261,32 @@ namespace Application.Features.NetworkMeasurements
                 request.StartTime,
                 request.EndTime,
                 request.RadiusInMeters
+            );
+
+            result.Success = true;
+            result.Code = 200;
+            result.Measurements = measurements.ToList();
+
+            return result;
+        }
+    }
+
+    public class GetMeasurementsByTimeRangeHandler : IRequestHandler<GetMeasurementsByTimeRangeCommand, GetMeasurementsByTimeRangeResult>
+    {
+        private readonly IUnitOfWork uow;
+
+        public GetMeasurementsByTimeRangeHandler(IUnitOfWork uow)
+        {
+            this.uow = uow;
+        }
+
+        public async Task<GetMeasurementsByTimeRangeResult> Handle(GetMeasurementsByTimeRangeCommand request, CancellationToken cancellationToken)
+        {
+            var result = new GetMeasurementsByTimeRangeResult();
+
+            var measurements = await uow.NetworkMeasurements.GetMeasurementsByTimeRange(
+                request.StartTime,
+                request.EndTime
             );
 
             result.Success = true;

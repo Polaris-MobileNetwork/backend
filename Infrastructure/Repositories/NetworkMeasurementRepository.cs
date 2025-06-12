@@ -98,5 +98,13 @@ namespace Infrastructure.Repositories
                 .OrderByDescending(n => n.TimeStamp)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<NetworkMeasurement>> GetMeasurementsByTimeRange(long startTime, long endTime)
+        {
+            return await dataContext.NetworkMeasurements
+                .Where(n => n.TimeStamp >= startTime && n.TimeStamp <= endTime)
+                .OrderByDescending(n => n.TimeStamp)
+                .ToListAsync();
+        }
     }
 } 

@@ -98,5 +98,30 @@ namespace WebAPI.Controllers
             var result = await mediator.Send(command);
             return Ok(result);
         }
+
+        [HttpGet("time-range")]
+        public async Task<IActionResult> GetMeasurementsByTimeRange(
+            [FromQuery] long startTime,
+            [FromQuery] long endTime)
+        {
+            if (startTime > endTime)
+            {
+                return BadRequest("Start time must be before end time");
+            }
+
+            if (startTime > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
+            {
+                return BadRequest("Start time cannot be in the future");
+            }
+
+            var command = new GetMeasurementsByTimeRangeCommand
+            {
+                StartTime = startTime,
+                EndTime = endTime
+            };
+
+            var result = await mediator.Send(command);
+            return Ok(result);
+        }
     }
 } 

@@ -12,5 +12,6 @@ namespace Application.Interfaces.IRepositories
         Task<(IEnumerable<NetworkMeasurement> Measurements, int TotalCount)> GetLatestMeasurements(int pageSize, int pageNumber);
         Task<IEnumerable<NetworkMeasurement>> GetMeasurementsInArea(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude);
         Task<IEnumerable<NetworkMeasurement>> GetMeasurementsByLocationAndTimeRange(double latitude, double longitude, long startTime, long endTime, double radiusInMeters = 100);
+        Task<IEnumerable<NetworkMeasurement>> GetMeasurementsByTimeRange(long startTime, long endTime);
     }
 } 
