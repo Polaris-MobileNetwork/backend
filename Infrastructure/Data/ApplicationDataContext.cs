@@ -9,6 +9,7 @@ namespace Infrastructure.Data
         public DbSet<NetworkMeasurement> NetworkMeasurements { get; set; }
         public DbSet<Test> Tests { get; set; }
         public DbSet<TestResult> TestResults { get; set; }
+        public DbSet<DeletedTest> DeletedTests { get; set; }
         public ApplicationDataContext(DbContextOptions<ApplicationDataContext>  options) : base(options)
         {
             
