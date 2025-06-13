@@ -49,7 +49,6 @@ artifacts/
 *.db
 
 # Test results
-TestResults/
 *.trx
 
 # Azure
