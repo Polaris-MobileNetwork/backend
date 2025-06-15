@@ -88,6 +88,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<INetworkMeasurementRepository, NetworkMeasurementRepository>();
 builder.Services.AddScoped<ITestRepository, TestRepository>();
 builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
+builder.Services.AddScoped<IDeletedTestRepository, DeletedTestRepository>();
 
 builder.Services.AddScoped<IHashService, HashService>();
 builder.Services.AddScoped<IJwtService, JwtService>();

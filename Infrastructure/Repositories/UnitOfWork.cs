@@ -16,19 +16,22 @@ namespace Infrastructure.Repositories
         public INetworkMeasurementRepository NetworkMeasurements { get; }
         public ITestRepository Tests { get; }
         public ITestResultRepository TestResults { get; }
+        public IDeletedTestRepository DeletedTests { get; }
 
         public UnitOfWork(
             ApplicationDataContext dataContext,
             IUserRepository userRepository,
             INetworkMeasurementRepository networkMeasurementRepository,
             ITestRepository testRepository,
-            ITestResultRepository testResultRepository)
+            ITestResultRepository testResultRepository,
+            IDeletedTestRepository deletedTestRepository)
         {
             this.dataContext = dataContext;
             this.Users = userRepository;
             this.NetworkMeasurements = networkMeasurementRepository;
             this.Tests = testRepository;
             this.TestResults = testResultRepository;
+            this.DeletedTests = deletedTestRepository;
         }
 
         public async Task<int> SaveChangesAsync()

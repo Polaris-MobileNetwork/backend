@@ -33,5 +33,11 @@ namespace Infrastructure.Repositories
         {
             await dataContext.Tests.AddRangeAsync(tests);
         }
+
+        public async Task Delete(Test test)
+        {
+            dataContext.Tests.Remove(test);
+            await Task.CompletedTask;
+        }
     }
 } 

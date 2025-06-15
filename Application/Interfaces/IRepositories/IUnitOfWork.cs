@@ -12,6 +12,7 @@ namespace Application.Interfaces.IRepositories
         public INetworkMeasurementRepository NetworkMeasurements { get; }
         public ITestRepository Tests { get; }
         public ITestResultRepository TestResults { get; }
+        public IDeletedTestRepository DeletedTests { get; }
         Task<int> SaveChangesAsync();
     }
 }

@@ -8,5 +8,6 @@ namespace Application.Interfaces.IRepositories
         Task<IEnumerable<Test>> GetByIds(IEnumerable<Guid> ids);
         Task Add(Test test);
         Task AddRange(IEnumerable<Test> tests);
+        Task Delete(Test test);
     }
 } 
