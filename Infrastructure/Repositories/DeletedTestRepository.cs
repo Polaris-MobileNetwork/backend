@@ -1,6 +1,7 @@
 using Application.Interfaces.IRepositories;
 using Domain.Entities;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
@@ -16,6 +17,11 @@ namespace Infrastructure.Repositories
         public async Task Add(DeletedTest deletedTest)
         {
             await dataContext.DeletedTests.AddAsync(deletedTest);
+        }
+
+        public async Task<IEnumerable<DeletedTest>> GetAll()
+        {
+            return await dataContext.DeletedTests.ToListAsync();
         }
     }
 } 

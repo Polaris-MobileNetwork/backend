@@ -31,5 +31,12 @@ namespace WebAPI.Controllers
         {
             return await mediator.Send(new DeleteTestCommand { Id = id });
         }
+
+        [AllowAnonymous]
+        [HttpGet("deleted")]
+        public async Task<ActionResult<GetDeletedTestsResult>> GetDeletedTests()
+        {
+            return await mediator.Send(new GetDeletedTestsCommand());
+        }
     }
 } 
