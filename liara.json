@@ -1,0 +1,20 @@
+{ 
+    {
+    "port": 8080,
+    "build": {
+        "dockerfile": "./docker-compose",
+        "cache": false,
+        "args": ["APP_VERSION=2.0.0"]
+    },
+
+    "docker": {
+        "timezone": "America/Los_Angeles"
+    },
+
+    "args": [
+    "sh",
+    "-c",
+    "sleep 10 && /entrypoint.sh run"
+    ]
+  }
+}
