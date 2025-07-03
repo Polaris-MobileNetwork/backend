@@ -38,5 +38,12 @@ namespace WebAPI.Controllers
         {
             return await mediator.Send(new GetDeletedTestsCommand());
         }
+
+        [AllowAnonymous]
+        [HttpGet("latest")]
+        public async Task<ActionResult<GetLatestTestsResult>> GetLatest()
+        {
+            return await mediator.Send(new GetLatestTestsCommand { Count = 100 });
+        }
     }
 } 

@@ -39,5 +39,10 @@ namespace Infrastructure.Repositories
             dataContext.Tests.Remove(test);
             await Task.CompletedTask;
         }
+        public async Task<IEnumerable<Test>> GetLatestTests(int count)
+        {
+            return await dataContext.Tests
+                .ToListAsync();
+        }
     }
 } 

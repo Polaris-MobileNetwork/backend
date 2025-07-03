@@ -9,5 +9,6 @@ namespace Application.Interfaces.IRepositories
         Task Add(Test test);
         Task AddRange(IEnumerable<Test> tests);
         Task Delete(Test test);
+        Task<IEnumerable<Test>> GetLatestTests(int count);
     }
 } 
