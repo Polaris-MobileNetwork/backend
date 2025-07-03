@@ -31,13 +31,13 @@ namespace Application.Features.Tests
         {
             var result = new GetTestsResult();
 
-            var currentUserId = identityService.GetCurrentUserId();
-            if (!currentUserId.HasValue)
-            {
-                result.Code = 401;
-                result.Message = "User not authenticated";
-                return result;
-            }
+            //var currentUserId = identityService.GetCurrentUserId();
+            //if (!currentUserId.HasValue)
+            //{
+            //    result.Code = 401;
+            //    result.Message = "User not authenticated";
+            //    return result;
+            //}
 
             var tests = await uow.Tests.GetByIds(request.Ids);
             if (!tests.Any())
