@@ -32,5 +32,12 @@ namespace WebAPI.Controllers
                 EndTime = endTime
             });
         }
+
+        [AllowAnonymous]
+        [HttpPost(nameof(SaveMultiple))]
+        public async Task<ActionResult<SaveTestResultsResult>> SaveMultiple([FromBody] SaveTestResultsCommand request)
+        {
+            return await mediator.Send(request);
+        }
     }
 } 
