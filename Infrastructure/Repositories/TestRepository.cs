@@ -39,6 +39,11 @@ namespace Infrastructure.Repositories
             dataContext.Tests.Remove(test);
             await Task.CompletedTask;
         }
+
+        public async Task<IEnumerable<Test>> GetAllExcept(IEnumerable<Guid> excludedIds)
+        {
+            return await dataContext.Tests.Where(t => !excludedIds.Contains(t.Id)).ToListAsync();
+        }
         public async Task<IEnumerable<Test>> GetLatestTests(int count)
         {
             return await dataContext.Tests

@@ -26,6 +26,13 @@ namespace WebAPI.Controllers
         }
 
         [AllowAnonymous]
+        [HttpPost("except")]
+        public async Task<ActionResult<GetTestsExceptResult>> GetExcept([FromBody] GetTestsExceptCommand request)
+        {
+            return await mediator.Send(request);
+        }
+
+        [AllowAnonymous]
         [HttpDelete("{id}")]
         public async Task<ActionResult<DeleteTestResult>> Delete(Guid id)
         {

@@ -10,5 +10,7 @@ namespace Application.Interfaces.IRepositories
         Task AddRange(IEnumerable<Test> tests);
         Task Delete(Test test);
         Task<IEnumerable<Test>> GetLatestTests(int count);
+
+        Task<IEnumerable<Test>> GetAllExcept(IEnumerable<Guid> excludedIds);
     }
 } 
