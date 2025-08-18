@@ -2,32 +2,36 @@
 services:
   # Service for your ASP.NET Core Web API
   polarisapi:
-    # We use the image built by our CI/CD pipeline
     image: ${DOCKER_USERNAME}/polaris-api:${IMAGE_TAG:-latest}
+    container_name: polaris-api
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      # The password is now securely passed in from a variable
-      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=BechenDB;Username=postgres;Password=1234
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=BechenDB;Username=postgres;Password=${POSTGRES_PASSWORD:-1234}
     depends_on:
       postgres-db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - polaris-network
 
   # Service for your PostgreSQL Database
   postgres-db:
     image: postgres:15
+    container_name: polaris-postgres
     restart: unless-stopped
     environment:
       - POSTGRES_USER=postgres
-      # The password is also passed in securely from a variable
-      - POSTGRES_PASSWORD=1234
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-1234}
       - POSTGRES_DB=BechenDB
-    # For security, we DO NOT expose the database port in production
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -35,6 +39,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - polaris-network
+    # Remove port exposure in production for security
+    # Uncomment only if you need external database access
+    # ports:
+    #   - "5432:5432"
 
 volumes:
   postgres_data:
+
+networks:
+  polaris-network:
+    driver: bridge
