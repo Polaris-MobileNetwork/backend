@@ -22,5 +22,7 @@ namespace Domain.Entities
         public int? IntervalSeconds { get; set; }
 
         public bool IsCompleted { get; set; } = false;
+
+        public virtual ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
     }
 } 

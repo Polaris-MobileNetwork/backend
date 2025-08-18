@@ -14,5 +14,16 @@ namespace Infrastructure.Data
         {
             
         }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            
+            modelBuilder.Entity<Test>()
+                .HasMany(t => t.TestResults) 
+                .WithOne(tr => tr.Test)      
+                .HasForeignKey(tr => tr.TestId)
+                .OnDelete(DeleteBehavior.Cascade); 
+        }
     }
 }
