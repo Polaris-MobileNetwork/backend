@@ -62,30 +62,81 @@ jobs:
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "IMAGE_TAG=latest" >> .env
             
-            # Pull latest images first
-            docker compose --env-file .env -f docker-compose.prod.yml pull
+            # Login to Docker Hub to avoid rate limiting
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
-            # Stop and remove old containers
-            docker compose -f docker-compose.prod.yml down
+            # Stop and remove old containers first
+            echo "Stopping existing containers..."
+            docker compose -f docker-compose.prod.yml down --remove-orphans || true
+            
+            # Pull images with retry logic
+            echo "Pulling Docker images..."
+            for i in {1..3}; do
+              echo "Pull attempt $i..."
+              if docker compose --env-file .env -f docker-compose.prod.yml pull; then
+                echo "Pull successful!"
+                break
+              else
+                echo "Pull attempt $i failed, retrying in 10 seconds..."
+                sleep 10
+                if [ $i -eq 3 ]; then
+                  echo "All pull attempts failed!"
+                  exit 1
+                fi
+              fi
+            done
             
             # Start new containers
+            echo "Starting containers..."
             docker compose --env-file .env -f docker-compose.prod.yml up -d
             
             # Wait for containers to start
             echo "Waiting for containers to start..."
-            sleep 30
+            sleep 45
             
             # Check container status
             echo "Container status:"
             docker ps
             
-            # Show API logs
-            echo "API logs (last 20 lines):"
-            docker logs polaris-api --tail 20
+            # Show API logs if container exists
+            if docker ps --format "table {{.Names}}" | grep -q "polaris-api"; then
+              echo "API logs (last 30 lines):"
+              docker logs polaris-api --tail 30
+            else
+              echo "API container not found!"
+              docker ps -a | grep polaris || echo "No polaris containers found"
+            fi
             
-            # Test the API health endpoint
-            echo "Testing API health endpoint:"
-            curl -f http://localhost:8080/health || echo "Health endpoint not available yet"
+            # Show postgres logs if container exists
+            if docker ps --format "table {{.Names}}" | grep -q "polaris-postgres"; then
+              echo "Postgres logs (last 10 lines):"
+              docker logs polaris-postgres --tail 10
+            fi
+            
+            # Test the API health endpoint with retry
+            echo "Testing API health endpoint..."
+            for i in {1..6}; do
+              echo "Health check attempt $i..."
+              if curl -f http://localhost:8080/health; then
+                echo "API is healthy!"
+                break
+              else
+                echo "Health check failed, retrying in 10 seconds..."
+                sleep 10
+                if [ $i -eq 6 ]; then
+                  echo "All health checks failed!"
+                  # Don't exit here, let's see what's wrong
+                fi
+              fi
+            done
+            
+            # Show system resources
+            echo "System resources:"
+            df -h
+            free -h
             
             # Clean up old images
             docker image prune -af
+            
+            # Logout from Docker Hub
+            docker logout
