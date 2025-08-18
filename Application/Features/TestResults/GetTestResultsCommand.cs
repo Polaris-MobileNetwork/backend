@@ -1,3 +1,4 @@
+using Application.Common;
 using Application.Common.Models;
 using Application.Interfaces.IRepositories;
 using Application.Interfaces.IServices;
@@ -15,7 +16,7 @@ namespace Application.Features.TestResults
 
     public class GetTestResultsResult : ResultModel
     {
-        public List<TestResult> TestResults { get; set; } = new List<TestResult>();
+        public List<TestResultDto> TestResults { get; set; } = new List<TestResultDto>();
     }
 
     public class GetTestResultsHandler : IRequestHandler<GetTestResultsCommand, GetTestResultsResult>
@@ -64,7 +65,22 @@ namespace Application.Features.TestResults
 
             result.Success = true;
             result.Code = 200;
-            result.TestResults = testResults.ToList();
+            foreach (var testResult in testResults) {
+                var testResultDto = new TestResultDto
+                {
+                    Id = testResult.Id,
+                    Timestamp = testResult.Timestamp,
+                    TestType = testResult.TestType,
+                    TargetHost = testResult.TargetHost,
+                    ResultValue = testResult.ResultValue,
+                    IsSuccess = testResult.IsSuccess,
+                    Details = testResult.Details,
+                    TestId = testResult.TestId,
+                };
+                result.TestResults.Add(testResultDto);
+            }
+
+           
 
             return result;
         }
